@@ -1,0 +1,569 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WAEC CBT Portal Pro</title>
+
+<style>
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:linear-gradient(135deg,#ff6a00,#ff00cc,#00c6ff);
+    background-size:400% 400%;
+    animation:bgMove 10s ease infinite;
+}
+
+@keyframes bgMove{
+    0%{background-position:left;}
+    100%{background-position:right;}
+}
+
+.header{
+    background:rgba(0,0,0,0.8);
+    color:white;
+    text-align:center;
+    padding:18px;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:90vh;
+    padding:20px;
+}
+
+.card{
+    background:white;
+    width:600px;
+    max-width:100%;
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 0 30px rgba(0,0,0,0.3);
+}
+
+h2{
+    text-align:center;
+    color:#6a11cb;
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    margin-bottom:10px;
+    border-radius:8px;
+    border:1px solid #ccc;
+    box-sizing:border-box;
+}
+
+button{
+    width:100%;
+    padding:13px;
+    border:none;
+    border-radius:8px;
+    background:linear-gradient(to right,#ff6a00,#ff00cc);
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+button:hover{
+    transform:scale(1.02);
+}
+
+.question{
+    background:#fafafa;
+    padding:12px;
+    margin-top:12px;
+    border-radius:10px;
+    border-left:5px solid #6a11cb;
+}
+
+.score{
+    background:linear-gradient(to right,#00b09b,#96c93d);
+    color:white;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+    font-size:20px;
+    font-weight:bold;
+    margin-bottom:10px;
+}
+
+.pass{
+    background:green;
+    color:white;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+}
+
+.fail{
+    background:red;
+    color:white;
+    padding:12px;
+    border-radius:10px;
+    text-align:center;
+}
+
+#dashboard,
+#registerPage,
+#adminPanel,
+#quizPage,
+#resultPage{
+    display:none;
+}
+
+.footer{
+    text-align:center;
+    color:white;
+    padding:15px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+🎓 WAEC CBT PORTAL PRO
+</div>
+
+<div class="container">
+
+<!-- LOGIN -->
+<div class="card" id="loginPage">
+
+<h2>Login</h2>
+
+<input id="username" placeholder="Enter Email">
+
+<input id="password" type="password" placeholder="Enter Password">
+
+<button onclick="studentLogin()">Student Login</button>
+
+<button onclick="showRegister()">Register New Account</button>
+
+<button onclick="adminLogin()">Admin Login</button>
+
+<p id="msg" style="color:red;text-align:center;"></p>
+
+</div>
+
+<!-- REGISTER -->
+<div class="card" id="registerPage">
+
+<h2>Create Account</h2>
+
+<input id="regEmail" placeholder="Enter Email">
+
+<input id="regPass" type="password" placeholder="Create Password">
+
+<button onclick="register()">Create Account</button>
+
+<button onclick="backLogin()">Back To Login</button>
+
+</div>
+
+<!-- DASHBOARD -->
+<div class="card" id="dashboard">
+
+<h2>Student Dashboard 🎓</h2>
+
+<button onclick="startQuiz()">Start WAEC Examination</button>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<!-- ADMIN -->
+<div class="card" id="adminPanel">
+
+<h2>Admin Panel 🛠</h2>
+
+<input id="qText" placeholder="Enter Question">
+
+<input id="optA" placeholder="Option A">
+
+<input id="optB" placeholder="Option B">
+
+<input id="optC" placeholder="Option C">
+
+<input id="optD" placeholder="Option D">
+
+<select id="correct">
+<option value="0">Correct Answer A</option>
+<option value="1">Correct Answer B</option>
+<option value="2">Correct Answer C</option>
+<option value="3">Correct Answer D</option>
+</select>
+
+<button onclick="addQuestion()">Submit Question</button>
+
+<button onclick="logout()">Logout</button>
+
+</div>
+
+<!-- QUIZ -->
+<div class="card" id="quizPage">
+
+<h2>WAEC CBT Examination</h2>
+
+<div class="score" id="liveScore">
+Score: 0/50
+</div>
+
+<button onclick="finishExam()">
+Finish Examination
+</button>
+
+<div id="quiz"></div>
+
+</div>
+
+<!-- RESULT -->
+<div class="card" id="resultPage">
+
+<h2>🧾 RESULT SLIP</h2>
+
+<p><b>Email:</b> <span id="rEmail"></span></p>
+
+<p><b>Date:</b> <span id="rDate"></span></p>
+
+<p><b>Total Questions:</b> <span id="rTotal"></span></p>
+
+<p><b>Score:</b> <span id="rScore"></span></p>
+
+<h2 id="rResult"></h2>
+
+<button onclick="window.print()">
+🖨 Print Result
+</button>
+
+<button onclick="logout()">
+Finish
+</button>
+
+</div>
+
+</div>
+
+<div class="footer">
+WAEC CBT Portal Pro © 2026
+</div>
+
+<script>
+
+/* ===== ADMIN ===== */
+const ADMIN="olarewajumishealayomide001@gmail.com";
+const ADMINPASS="Mishael@1234";
+
+/* ===== USERS ===== */
+let users=[];
+
+/* ===== REGISTER ===== */
+function showRegister(){
+
+loginPage.style.display="none";
+registerPage.style.display="block";
+
+}
+
+function backLogin(){
+
+registerPage.style.display="none";
+loginPage.style.display="block";
+
+}
+
+function register(){
+
+if(regEmail.value==="" || regPass.value===""){
+
+alert("Fill all fields");
+return;
+
+}
+
+users.push({
+email:regEmail.value,
+password:regPass.value
+});
+
+alert("✅ Account Created Successfully!");
+
+regEmail.value="";
+regPass.value="";
+
+backLogin();
+
+}
+
+/* ===== STUDENT LOGIN ===== */
+function studentLogin(){
+
+let found=users.find(
+u=>u.email===username.value
+&&
+u.password===password.value
+);
+
+if(found){
+
+loginPage.style.display="none";
+dashboard.style.display="block";
+
+}else{
+
+msg.innerHTML="Wrong Student Login";
+
+}
+
+}
+
+/* ===== ADMIN LOGIN ===== */
+function adminLogin(){
+
+if(
+username.value===ADMIN
+&&
+password.value===ADMINPASS
+){
+
+loginPage.style.display="none";
+adminPanel.style.display="block";
+
+}else{
+
+msg.innerHTML="Only Admin Can Access Admin Panel";
+
+}
+
+}
+
+/* ===== LOGOUT ===== */
+function logout(){
+
+location.reload();
+
+}
+
+/* ===== 50 QUESTIONS ===== */
+
+let questions=[
+
+{q:"1. Capital of Nigeria?",a:["Lagos","Abuja","Kano","Ibadan"],c:1},
+{q:"2. 2 + 2 = ?",a:["3","4","5","6"],c:1},
+{q:"3. Largest planet?",a:["Earth","Mars","Jupiter","Venus"],c:2},
+{q:"4. HTML is used for?",a:["Cooking","Web Design","Driving","Gaming"],c:1},
+{q:"5. Water freezes at?",a:["0°C","20°C","100°C","50°C"],c:0},
+
+{q:"6. H2O means?",a:["Salt","Hydrogen","Water","Oxygen"],c:2},
+{q:"7. Nigeria independence year?",a:["1950","1960","1970","1980"],c:1},
+{q:"8. Sun rises in the?",a:["West","East","North","South"],c:1},
+{q:"9. 5 x 5 = ?",a:["10","20","25","30"],c:2},
+{q:"10. Human blood color?",a:["Blue","Green","Red","Yellow"],c:2},
+
+{q:"11. CPU means?",a:["Central Processing Unit","Computer Power Unit","Control Panel Unit","Central Print Unit"],c:0},
+{q:"12. Largest ocean?",a:["Atlantic","Pacific","Indian","Arctic"],c:1},
+{q:"13. 10 ÷ 2 = ?",a:["2","3","5","10"],c:2},
+{q:"14. Opposite of hot?",a:["Warm","Cold","Cool","Ice"],c:1},
+{q:"15. Birds use ____ to fly?",a:["Legs","Fins","Wings","Hands"],c:2},
+
+{q:"16. Earth rotates in?",a:["12 hrs","24 hrs","48 hrs","7 days"],c:1},
+{q:"17. Keyboard is an?",a:["Output device","Input device","Software","Printer"],c:1},
+{q:"18. Green + Yellow = ?",a:["Blue","Orange","Red","Purple"],c:1},
+{q:"19. 100 ÷ 10 = ?",a:["5","10","20","50"],c:1},
+{q:"20. Water boils at?",a:["0°C","50°C","100°C","200°C"],c:2},
+
+{q:"21. 3 x 3 = ?",a:["6","7","8","9"],c:3},
+{q:"22. Nigeria is in?",a:["Europe","Asia","Africa","America"],c:2},
+{q:"23. Internet is used for?",a:["Communication","Cooking","Sleeping","Walking"],c:0},
+{q:"24. Largest animal?",a:["Elephant","Blue Whale","Lion","Shark"],c:1},
+{q:"25. Opposite of day?",a:["Night","Morning","Noon","Sun"],c:0},
+
+{q:"26. 20 - 5 = ?",a:["10","15","20","25"],c:1},
+{q:"27. Sound travels through?",a:["Vacuum","Air","Shadow","Stone"],c:1},
+{q:"28. Nigeria flag colors?",a:["Red/Blue","Green/White","Yellow/Green","Black/White"],c:1},
+{q:"29. 7 x 7 = ?",a:["42","49","56","36"],c:1},
+{q:"30. Computer is a?",a:["Machine","Animal","Food","Plant"],c:0},
+
+{q:"31. A triangle has ___ sides?",a:["2","3","4","5"],c:1},
+{q:"32. Which is a mammal?",a:["Snake","Whale","Fish","Frog"],c:1},
+{q:"33. 12 ÷ 3 = ?",a:["2","3","4","5"],c:2},
+{q:"34. Plant food is made in?",a:["Root","Leaf","Flower","Stem"],c:1},
+{q:"35. Light comes from?",a:["Moon","Sun","Stone","Water"],c:1},
+
+{q:"36. 9 + 1 = ?",a:["8","9","10","11"],c:2},
+{q:"37. Mercury is a?",a:["Star","Planet","Animal","Gas"],c:1},
+{q:"38. Fire needs?",a:["Water","Ice","Oxygen","Stone"],c:2},
+{q:"39. Largest continent?",a:["Europe","Africa","Asia","Australia"],c:2},
+{q:"40. 8 x 2 = ?",a:["14","15","16","18"],c:2},
+
+{q:"41. Humans have ___ legs?",a:["1","2","3","4"],c:1},
+{q:"42. Photosynthesis occurs in?",a:["Root","Leaf","Flower","Soil"],c:1},
+{q:"43. Dog is a?",a:["Bird","Fish","Mammal","Reptile"],c:2},
+{q:"44. 6 + 6 = ?",a:["10","11","12","13"],c:2},
+{q:"45. Nigeria capital city?",a:["Abuja","Lagos","Kano","Ibadan"],c:0},
+
+{q:"46. Opposite of big?",a:["Tall","Small","Wide","Long"],c:1},
+{q:"47. 15 - 5 = ?",a:["5","10","15","20"],c:1},
+{q:"48. Water cycle includes?",a:["Explosion","Evaporation","Digestion","Rotation"],c:1},
+{q:"49. Human brain controls?",a:["Walking","Thinking","Movement","All of the above"],c:3},
+{q:"50. WAEC means?",a:["West African Examinations Council","World Africa Exam Council","West Africa Education Center","World Examination Council"],c:0}
+
+];
+
+/* ===== ADD QUESTION ===== */
+function addQuestion(){
+
+questions.push({
+
+q:qText.value,
+a:[optA.value,optB.value,optC.value,optD.value],
+c:Number(correct.value)
+
+});
+
+alert("✅ Question Submitted Successfully!");
+
+qText.value="";
+optA.value="";
+optB.value="";
+optC.value="";
+optD.value="";
+
+}
+
+/* ===== START QUIZ ===== */
+function startQuiz(){
+
+dashboard.style.display="none";
+quizPage.style.display="block";
+
+let html="";
+
+questions.forEach((x,i)=>{
+
+html+=`
+<div class="question">
+
+<b>${x.q}</b><br><br>
+`;
+
+x.a.forEach((opt,j)=>{
+
+html+=`
+<label>
+
+<input type="radio"
+name="q${i}"
+value="${j}"
+onchange="calcScore()">
+
+${opt}
+
+</label><br>
+`;
+
+});
+
+html+=`</div>`;
+
+});
+
+quiz.innerHTML=html;
+
+calcScore();
+
+}
+
+/* ===== LIVE SCORE ===== */
+function calcScore(){
+
+let s=0;
+
+questions.forEach((x,i)=>{
+
+let ans=document.querySelector(
+'input[name="q'+i+'"]:checked'
+);
+
+if(ans && Number(ans.value)===x.c){
+
+s++;
+
+}
+
+});
+
+liveScore.innerHTML=
+"Score: "+s+"/"+questions.length;
+
+}
+
+/* ===== FINISH EXAM ===== */
+function finishExam(){
+
+let s=0;
+
+questions.forEach((x,i)=>{
+
+let ans=document.querySelector(
+'input[name="q'+i+'"]:checked'
+);
+
+if(ans && Number(ans.value)===x.c){
+
+s++;
+
+}
+
+});
+
+let passMark=Math.ceil(
+questions.length*0.4
+);
+
+let result=s>=passMark
+?"🎉 PASS"
+:"❌ FAIL";
+
+quizPage.style.display="none";
+resultPage.style.display="block";
+
+rEmail.innerText=username.value;
+rDate.innerText=
+new Date().toLocaleDateString();
+
+rTotal.innerText=
+questions.length;
+
+rScore.innerText=
+s+"/"+questions.length;
+
+rResult.innerText=result;
+
+if(s>=passMark){
+
+rResult.className="pass";
+
+}else{
+
+rResult.className="fail";
+
+}
+
+}
+
+</script>
+
+</body>
+</html>
